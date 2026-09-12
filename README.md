@@ -155,7 +155,7 @@ npx tsc --noEmit
 
 **117 offline tests passed** during the hackathon, covering real QR encode/decode, budgets, replay, stale/revised evidence, physical parsing, station-specific tools, localhost controls, encrypted credentials, task read-back and timeout recovery. These tests use controlled model/provider responses and do not spend API credit or open the real serial port.
 
-The subsequent phone-tunnel helper adds 11 focused access-boundary checks; the combined suite has **128 passing tests**.
+The subsequent phone-tunnel helper adds 11 focused access-boundary checks, and reset has two regression checks; the combined suite has **130 passing tests**.
 
 The published source was also exported into a separate directory and installed with a fresh Python environment and npm dependencies. All 117 tests, the production frontend build and TypeScript check passed there. No sibling library checkouts or private runtime files were needed. Build before type-checking so Vinext can generate its route declarations. [Reproduction details](docs/VALIDATION.md#clean-publication-check).
 

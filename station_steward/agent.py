@@ -641,6 +641,8 @@ def agent_router(service: AgentService):
                 service.positions = {"red_can": "staging", "blue_can": "inspection"}
                 service.arm_available = True
                 service.arm_at = "staging"
+                # Clear the active presentation, retaining receipts for historical replay.
+                service.active_id = None
             elif body.action == "swap":
                 service.positions["red_can"], service.positions["blue_can"] = service.positions["blue_can"], service.positions["red_can"]
             elif body.action == "toggle_arm":

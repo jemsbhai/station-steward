@@ -10,6 +10,7 @@ Lead with the physical obstruction becoming an assigned Ambiguous task. Use the 
 - Keep the bare motor disconnected. Leave the updated sketch's driver flag false.
 - Enable Ambiguous handoffs to a person who can open the destination workspace.
 - Open that workspace in another tab. The demo creates real assigned tasks.
+- Between virtual runs, use **Reset demo** after the mission stops. It restores the cans and arm and clears the active mission's results, comparison, activity and replay notice. Historical records and Ambiguous tasks are retained; reset does not renew the QR scan.
 - Rehearse the actual workflow. Model and network latency vary; the timings below describe a two-minute edited presentation. Label any cuts or sped-up waits, and never substitute replay for a supposedly live action.
 
 ## 0:00–0:15 — Put the problem in the room

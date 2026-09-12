@@ -197,3 +197,49 @@ def test_completed_receipt_does_not_claim_current_verification_after_scene_chang
     service.revision += 1
     assert not service.snapshot()["mission"]["verification_current"]
     assert mission.status == "completed"
+
+
+def test_reset_clears_active_results_and_preserves_replay_receipt(tmp_path):
+    app = create_app(connection_directory=tmp_path)
+    service = app.state.agent
+    service.passport_check = lambda *_args, **_kwargs: (True, "")
+    service.station_lookup = lambda _: "virtual"
+    mission = scripted(service, [("define_objective", objective()), ("observe_scene", {}),
+                                ("move_object", {"object_id": "red_can", "destination": "rack_1", "observed_revision": 1, "reason": "Clear staging"}),
+                                ("observe_scene", {}), ("finish_mission", {"summary": "Staging clear"})])
+    service.execute(mission)
+    assert mission.status == "completed" and service.snapshot()["mission"] is not None
+    calls, events = copy.deepcopy(mission.calls), copy.deepcopy(mission.events)
+    revision = service.revision
+    service.arm_available = False
+    with TestClient(app) as client:
+        result = client.post("/api/agent/scene", json={"action": "reset"})
+        assert result.status_code == 200 and result.json()["mission"] is None
+        assert client.get("/api/agent/state").json()["mission"] is None
+        assert service.positions == {"red_can": "staging", "blue_can": "inspection"}
+        assert service.arm_available and service.arm_at == "staging"
+        assert service.revision == revision + 1
+        assert service.missions[mission.id] is mission
+        assert mission.calls == calls and mission.events == events
+        service.responder = lambda _: pytest.fail("Reset or replay invoked the model")
+        service.action = lambda *_: pytest.fail("Replay invoked an action")
+        assert client.get(f"/api/agent/missions/{mission.id}/replay").json()["historical"]
+        assert client.get("/api/agent/state").json()["mission"] is None
+
+
+def test_reset_rejects_an_unfinished_worker_and_remote_callers(tmp_path):
+    app = create_app(connection_directory=tmp_path)
+    service = app.state.agent
+    service.passport_check = lambda *_args, **_kwargs: (True, "")
+    service.station_lookup = lambda _: "virtual"
+    mission = service.start("Clear staging", 24, "test", background=False)
+    before = service.scene()
+    with TestClient(app) as client:
+        assert client.post("/api/agent/scene", json={"action": "reset"}).status_code == 409
+        mission.cancelled.set()
+        assert client.post("/api/agent/scene", json={"action": "reset"}).status_code == 409
+        assert service.active_id == mission.id and service.scene() == before
+        mission.worker_done.set()
+        with TestClient(app, client=("192.168.1.88", 3000)) as remote:
+            assert remote.post("/api/agent/scene", json={"action": "reset"}).status_code == 403
+        assert service.active_id == mission.id and service.scene() == before

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Bot, History, Play, RotateCcw, Square } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -66,14 +66,21 @@ export default function AgentPanel({ passport }: { passport: Passport | null }) 
   const [error, setError] = useState('');
   const [offline, setOffline] = useState(false);
   const [replay, setReplay] = useState<MissionReplay | null>(null);
+  const stateEpoch = useRef(0);
+  const changingState = useRef(false);
+  const activeMission = useRef<string | null>(null);
+  activeMission.current = state?.mission?.id ?? null;
   useEffect(() => {
     let cancelled = false;
     let timer: ReturnType<typeof setTimeout>;
     async function refresh() {
+      const epoch = stateEpoch.current;
       try {
-        const next = await api<AgentState>('/state');
-        if (!cancelled) { setState(next); setOffline(false); }
-      } catch { if (!cancelled) setOffline(true); }
+        if (!changingState.current) {
+          const next = await api<AgentState>('/state');
+          if (!cancelled && epoch === stateEpoch.current && !changingState.current) { setState(next); setOffline(false); }
+        }
+      } catch { if (!cancelled && epoch === stateEpoch.current && !changingState.current) setOffline(true); }
       finally { if (!cancelled) timer = setTimeout(refresh, 900); }
     }
     void refresh();
@@ -82,36 +89,59 @@ export default function AgentPanel({ passport }: { passport: Passport | null }) 
   useEffect(() => { setReplay(null); setStopping(false); }, [state?.mission?.id]);
   useEffect(() => { setGoal(passport?.station.id === 'bench' ? BENCH_GOAL : VIRTUAL_GOAL); }, [passport?.station.id]);
 
-  async function refreshState() { setState(await api<AgentState>('/state')); }
+  async function refreshState() {
+    if (changingState.current) return;
+    const epoch = stateEpoch.current;
+    const next = await api<AgentState>('/state');
+    if (epoch === stateEpoch.current && !changingState.current) setState(next);
+  }
 
   async function run() {
-    if (!passport) return;
+    if (!passport || changingState.current) return;
+    changingState.current = true;
+    stateEpoch.current += 1;
     setBusy(true); setError(''); setReplay(null); setStopping(false);
     try {
       await api('/missions', { goal, step_limit: limit, passport_id: passport.id });
       setState(await api<AgentState>('/state'));
     } catch (err) { setError((err as Error).message); }
-    finally { setBusy(false); }
+    finally { stateEpoch.current += 1; changingState.current = false; setBusy(false); }
   }
   async function stop() {
-    if (!state?.mission) return;
+    if (!state?.mission || changingState.current) return;
+    changingState.current = true;
+    stateEpoch.current += 1;
     setBusy(true); setError('');
     try { await api(`/missions/${state.mission.id}/stop`, {}); setStopping(true); }
     catch (err) { setError((err as Error).message); }
-    finally { setBusy(false); }
+    finally { stateEpoch.current += 1; changingState.current = false; setBusy(false); }
   }
   async function changeScene(action: string) {
+    if (changingState.current) return;
+    changingState.current = true;
+    stateEpoch.current += 1;
     setBusy(true); setError('');
-    try { setState(await api<AgentState>('/scene', { action })); }
+    try {
+      const next = await api<AgentState>('/scene', { action });
+      stateEpoch.current += 1;
+      setState(next);
+      setOffline(false);
+      if (action === 'reset') { setReplay(null); setStopping(false); }
+    }
     catch (err) { setError((err as Error).message); }
-    finally { setBusy(false); }
+    finally { stateEpoch.current += 1; changingState.current = false; setBusy(false); }
   }
   async function replayMission() {
-    if (!state?.mission) return;
+    if (!state?.mission || changingState.current) return;
+    const epoch = stateEpoch.current;
+    const missionId = state.mission.id;
     setBusy(true); setError('');
-    try { setReplay(await api<MissionReplay>(`/missions/${state.mission.id}/replay`)); }
-    catch (err) { setError((err as Error).message); }
-    finally { setBusy(false); }
+    try {
+      const next = await api<MissionReplay>(`/missions/${missionId}/replay`);
+      if (epoch === stateEpoch.current && activeMission.current === missionId && !changingState.current) setReplay(next);
+    }
+    catch (err) { if (epoch === stateEpoch.current) setError((err as Error).message); }
+    finally { if (epoch === stateEpoch.current) setBusy(false); }
   }
   const mission = state?.mission;
   const running = !!mission?.running;
@@ -146,7 +176,7 @@ export default function AgentPanel({ passport }: { passport: Passport | null }) 
     </div><div>
       <HardwarePanel state={state?.hardware} onRefresh={refreshState} />
       {!bench && <>{state && <Workcell scene={state.scene} />}
-      <div className="scene-controls"><Button variant="outline" disabled={busy || running || offline} onClick={() => changeScene('reset')}><RotateCcw size={16} /> Reset scene</Button><Button variant="outline" disabled={busy || !state || offline} onClick={() => changeScene('toggle_arm')}>{state?.scene.arm_available ? 'Disconnect arm' : 'Connect arm'}</Button></div>
+      <div className="scene-controls"><Button variant="outline" disabled={busy || running || offline} onClick={() => changeScene('reset')}><RotateCcw size={16} /> Reset demo</Button><Button variant="outline" disabled={busy || !state || offline} onClick={() => changeScene('toggle_arm')}>{state?.scene.arm_available ? 'Disconnect arm' : 'Connect arm'}</Button></div>
       <details className="adaptation-controls"><summary>Test adaptation while the agent runs</summary><p>Change the evidence or available tools. The next action must use the new state.</p><div><Button variant="outline" disabled={busy || !state || offline} onClick={() => changeScene('swap')}>Swap can positions</Button><Button variant="outline" disabled={busy || !mission?.evidence.observed_at || offline} onClick={() => changeScene('age_observation')}>Age observation by 31s</Button></div></details>
       {mission?.comparison && <div className="move-comparison"><span className="eyebrow">MOVE COMPARISON · REVISION {mission.comparison.revision}</span><table><thead><tr><th>Destination</th><th>Travel units</th><th>Available</th></tr></thead><tbody>{mission.comparison.options.map(option => <tr key={option.destination}><td>{option.destination.replace('_', ' ')}{mission.comparison?.shortest === option.destination ? ' · shortest' : ''}</td><td>{option.travel_units}</td><td>{option.legal ? 'Yes' : 'No'}</td></tr>)}</tbody></table><p className="small-detail">Compared without moving; recorded by Pollard. Distance in the simulator, not measured energy savings.</p></div>}</>}
     </div></div>
