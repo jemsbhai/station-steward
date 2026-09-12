@@ -95,6 +95,8 @@ For another Arduino port or a manual phone address:
 
 Connect the phone and laptop to the same network. Open the phone link shown by the app, or scan its connection QR. Some venue Wi-Fi networks isolate devices; a shared hotspot can help. The laptop camera runs on localhost; the phone only displays the QR and does not need camera permission.
 
+For different networks or isolated venue Wi-Fi, use the [paired phone-only ngrok gateway](docs/TUNNEL.md). It keeps the main app and credentials on the laptop and provides a separate private pairing QR at `http://localhost:8766/pair`.
+
 ### 3. Try the virtual workcell
 
 1. On the phone, select **Virtual workcell** and show its passport.
@@ -140,7 +142,7 @@ One workspace is connected at a time. Without a connection, requests for help re
 
 The system does not control a physical arm or motor, pour drinks, prove DHT freshness, authenticate arbitrary internet users, autonomously handle incoming Ambiguous tasks, or integrate CopilotKit/Exa/OpenRouter. MultiSpecQR was replaced with ordinary QR after screen-reflection trials. These are stated boundaries, not hidden mock integrations.
 
-This is a trusted local demo companion. Privileged browser controls require localhost and matching origin; it is not an internet-facing service. Do not expose it through a public tunnel as a production application. Camera frames are decoded locally and not sent to the model; goals and tool results, including sensor values, are sent to the model. Raw frames are not retained.
+This is a trusted local demo companion. Privileged browser controls require localhost and matching origin. Do not point a public tunnel directly at the main app; use the [restricted phone gateway](docs/TUNNEL.md) for temporary remote phone access. Camera frames are decoded locally and not sent to the model; goals and tool results, including sensor values, are sent to the model. Raw frames are not retained.
 
 ## Tests and evidence
 
@@ -152,6 +154,8 @@ npx tsc --noEmit
 ```
 
 **117 offline tests passed** during the hackathon, covering real QR encode/decode, budgets, replay, stale/revised evidence, physical parsing, station-specific tools, localhost controls, encrypted credentials, task read-back and timeout recovery. These tests use controlled model/provider responses and do not spend API credit or open the real serial port.
+
+The subsequent phone-tunnel helper adds 11 focused access-boundary checks; the combined suite has **128 passing tests**.
 
 The published source was also exported into a separate directory and installed with a fresh Python environment and npm dependencies. All 117 tests, the production frontend build and TypeScript check passed there. No sibling library checkouts or private runtime files were needed. Build before type-checking so Vinext can generate its route declarations. [Reproduction details](docs/VALIDATION.md#clean-publication-check).
 
