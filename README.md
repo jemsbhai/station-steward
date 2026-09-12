@@ -6,7 +6,9 @@ Station Steward is a local, laptop-hosted agent for two environments: a real Ard
 
 Built for the **AI Tinkerers / OpenAI Agents Everywhere hackathon, Miami, September 12, 2026**.
 
-[Two-minute demo](docs/DEMO.md) · [Architecture](docs/ARCHITECTURE.md) · [Hardware setup](docs/HARDWARE.md) · [Validation](docs/VALIDATION.md) · [Hackathon writeup](docs/WRITEUP.md)
+[Submission description](SUBMISSION.md) · [Judge's guide](docs/JUDGING.md) · [Two-minute demo script](docs/DEMO.md) · [Architecture](docs/ARCHITECTURE.md) · [Hardware setup](docs/HARDWARE.md) · [Validation](docs/VALIDATION.md) · [Build story](docs/WRITEUP.md)
+
+For a shared-workbench operator, a useful agent must turn a goal into verified work or an assigned next action. **The key demonstration is a real obstruction becoming a verified Ambiguous task:** the agent observes that the bench is blocked, discovers it has no actuator, and gives the remaining work to a person with the goal and evidence attached.
 
 ## What makes it agentic?
 
@@ -145,11 +147,13 @@ This is a trusted local demo companion. Privileged browser controls require loca
 ```powershell
 .\.venv\Scripts\python.exe -m pytest -q
 cd mobile
-npx tsc --noEmit
 npm run build
+npx tsc --noEmit
 ```
 
 **117 offline tests passed** during the hackathon, covering real QR encode/decode, budgets, replay, stale/revised evidence, physical parsing, station-specific tools, localhost controls, encrypted credentials, task read-back and timeout recovery. These tests use controlled model/provider responses and do not spend API credit or open the real serial port.
+
+The published source was also exported into a separate directory and installed with a fresh Python environment and npm dependencies. All 117 tests, the production frontend build and TypeScript check passed there. No sibling library checkouts or private runtime files were needed. Build before type-checking so Vinext can generate its route declarations. [Reproduction details](docs/VALIDATION.md#clean-publication-check).
 
 The explicit scripts `scripts/smoke_agent.py` and `scripts/smoke_bench.py` make live calls. The bench check opens the physical port; `--live-handoff` may create a real task in the enabled destination. Stop the main app first so one process owns the port and journal. Raw receipts go to ignored `artifacts/` and may contain private task metadata. See [validation details](docs/VALIDATION.md) before using them.
 

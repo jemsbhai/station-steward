@@ -34,6 +34,20 @@ Ordinary tests use mocked model/provider responses and controlled serial transpo
 
 TypeScript checking and the static frontend build passed. The motor-disabled D7 sketch compiled for `arduino:avr:uno` using 6,250 bytes of program storage and 504 bytes of dynamic memory; compilation is not an upload or physical actuation test.
 
+## Clean publication check
+
+The initial public commit, `52cfe5b6499fa35129e3f1ca4923674a2829ef2c`, was exported with Git into a separate directory. That copy contained no ignored credentials, generated frontend output, sibling library checkouts or private run records.
+
+| Check | Result |
+|---|---|
+| New Python environment; install `requirements-dev.txt` | Passed, including all three pinned public Git dependencies |
+| `npm ci --include=optional` | Passed from the committed lockfile |
+| Offline Python suite | 117 passed |
+| Production frontend build on Node 24 | Passed on rerun |
+| TypeScript after the build | Passed; generated route declarations resolved automatically |
+
+The first frontend build completed its output stages but exited with a Windows/libuv shutdown assertion. Repeating the same build command succeeded with exit code 0; no source patch or runtime change was required. This records both attempts rather than presenting the first as a clean exit. No live provider or hardware calls were part of this fresh-install check.
+
 ## Reproducing checks
 
 From the repository root after installing dependencies:
@@ -41,11 +55,13 @@ From the repository root after installing dependencies:
 ```powershell
 .\.venv\Scripts\python.exe -m pytest -q
 cd mobile
-npx tsc --noEmit
 npm run build
+npx tsc --noEmit
 ```
 
 The full suite's DPAPI checks require Windows. Native ZBar and cross-platform credential storage are additional work for other operating systems.
+
+Run the build before the TypeScript check on a fresh checkout: Vinext generates the route declarations used by the type checker.
 
 Explicit live checks:
 

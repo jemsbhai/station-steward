@@ -1,4 +1,6 @@
-# Two-minute demonstration
+# Two-minute demonstration script
+
+Lead with the physical obstruction becoming an assigned Ambiguous task. Use the virtual workcell as the short second example of the same agent adapting to different tools. This is a recording/presentation guide, not a claim that a video has been produced.
 
 ## Prepare before presenting
 
@@ -8,34 +10,52 @@
 - Keep the bare motor disconnected. Leave the updated sketch's driver flag false.
 - Enable Ambiguous handoffs to a person who can open the destination workspace.
 - Open that workspace in another tab. The demo creates real assigned tasks.
+- Rehearse the actual workflow. Model and network latency vary; the timings below describe a two-minute edited presentation. Label any cuts or sped-up waits, and never substitute replay for a supposedly live action.
 
-## 0:00–0:20 — State the problem
+## 0:00–0:15 — Put the problem in the room
 
-“An agent should know what this station can actually do. If equipment is missing or evidence is stale, it should adapt and make unfinished work visible to a person.”
+“This bench has a sensor, but no robot that can clear it. Station Steward discovers what the station can do, checks the goal against fresh evidence, and assigns the rest to a person.”
 
-Show the real bench and the separate virtual workcell. Explain that the phone QR selects a registered environment; it is not proof that a motor or sensor works.
+Show the UNO, a flat target and the phone. Establish that the arm shown later is simulated. The phone QR selects a registered environment; it does not prove that equipment works.
 
-## 0:20–0:50 — Let the agent act in simulation
+## 0:15–0:45 — Give the agent a physical goal
 
-Show and scan a **Virtual workcell** passport. Run **Clear staging**. Point to capability discovery, observation, legal destination comparison, movement and final verification in the activity log. These are model-selected tool calls over the actual simulator state.
+Select **Arduino bench** on the phone, scan its passport, and run **Check 20 cm clearance** promptly. Keep a flat target around 10 cm away so the actual displayed reading is stable and below the goal.
 
-For an alternate run, disconnect the virtual arm after starting. The planned move must fail, and the model should adapt or request help. Do not claim a physical robot moved.
+“The model chooses its tools. This station exposes a real USB observation, but no move or motor command. The backend checks fresh evidence against the original goal.”
 
-## 0:50–1:25 — Give the same agent physical evidence
+Show the tool activity and measured distance. Quote the reading actually on screen; **2.3 cm was the recorded validation run, not a guaranteed reading in the next run**.
 
-Show and scan an **Arduino bench** passport. Place the target around 10 cm away and run **Check 20 cm clearance**. The tool list changes to physical inspection; it contains no simulator movement or motor command.
+## 0:45–1:15 — Show the real Ambiguous result
 
-The model reads actual UNO telemetry. A blocked or unmeasurable condition should lead to a human handoff. Open the resulting Ambiguous task and show the assignment, blocker, evidence and read-back status.
+Open the task from the mission's handoff link. Show the assignee, original goal, blocker and physical evidence. Return to the app's verified delivery status.
 
-## 1:25–1:45 — Resolve and verify
+“The obstruction is still here. What changed is that the unfinished work now has an owner and a persistent record. We read the task back to verify delivery; uncertain requests can be recovered without automatically posting duplicates.”
 
-Move the target to around 30 cm, keeping a reflecting surface in the beam. Obtain a fresh scan and run a new mission. A valid fresh reading meeting the goal can complete it. Marking the task done alone does not prove clearance.
+Only say the task was delivered when the real result confirms it. A local pending handoff or uncertain request is a different outcome.
 
-This is a proposed live demonstration sequence. The recorded hackathon evidence verifies the blocked physical handoff; it does not claim this passing physical step was performed in that recorded check.
+## 1:15–1:35 — Make the run inspectable
 
-## 1:45–2:00 — Show budget and replay
+Show the current run's model/tool counts and **Replay mission**.
 
-Show model/tool counts and the mission budget. Replay the recorded mission: no new model calls, hardware observations, moves or Ambiguous tasks. If time permits, start a separate four-step run to demonstrate the budget stopping unfinished work.
+“Pollard bounds and records this mission. Replay reuses its recorded results without another model call or task. Chronofy keeps old evidence from being treated as current.”
+
+The validated physical run used four model calls and four tools. A new run can use different counts. Replay is historical inspection, not fresh verification of the bench.
+
+## 1:35–2:00 — Show adaptation and the result
+
+Show a clearly labeled second interaction with **Virtual workcell → Clear staging**: capability discovery, destination comparison, movement and verified placement. A short arm-disconnect example can show the model responding when a planned action becomes unavailable. Use an actual recorded interaction if the full run does not fit; label its environment and any edit.
+
+“With a virtual arm, this agent can move and verify. With a real sensor and no actuator, it hands off. The environment determines which actions are possible, and evidence determines which results can be claimed.”
+
+End on the resulting station state or verified task, with the public repository visible. The strongest takeaway is the complete goal-to-outcome interaction.
+
+## Optional extended checks after the pitch
+
+- Move the physical target to around 30 cm, rescan and start a new clearance mission. Fresh valid measurements satisfying the goal can complete it. This passing branch has controlled-sample test coverage; the published live physical run established the blocked handoff.
+- Marking the task done alone does not verify clearance. Human resolution needs a new station observation and mission; automatic resumption is not implemented.
+- Try a separate four-step mission budget. Show the stop and remaining work without claiming the goal completed.
+- In simulation, use a goal with more than one permitted destination and inspect `compare_moves`. Its distances are virtual candidate comparisons, not real robot energy measurements.
 
 ## Useful fallback paths
 
