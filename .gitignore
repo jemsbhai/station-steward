@@ -1,0 +1,34 @@
+.local/
+.ambi/
+.env
+.env.*
+!.env.example
+.venv/
+__pycache__/
+.pytest_cache/
+
+# Local runs, credentials and private working notes
+artifacts/
+HACKATHON-NOTES.md
+CANTENDER-DESIGN.md
+STATION-STEWARD-DESIGN.md
+*.dpapi
+*.pem
+*.key
+
+# Generated frontend and editor files
+node_modules/
+dist/
+.next/
+.vinext/
+.wrangler/
+*.tsbuildinfo
+*.log
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Keep only the portable, credential-free static build manifest.
+mobile/.openai/*
+!mobile/.openai/hosting.json

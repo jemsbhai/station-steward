@@ -1,0 +1,64 @@
+{
+  "project": "Station Steward",
+  "date": "2026-09-12",
+  "publication_policy": "Selected results only; no workspace, account, task or session identifiers, raw model content or credentials.",
+  "offline_tests_passed": 117,
+  "phone_laptop_camera_trial": "separately confirmed on actual devices",
+  "scenarios": [
+    {
+      "scenario": "clear",
+      "environment": "discrete simulator",
+      "live_model": true,
+      "status": "completed",
+      "model_calls": 7,
+      "tool_calls": 7,
+      "reported_tokens": 10947,
+      "replay_avoided_calls": 14
+    },
+    {
+      "scenario": "sort",
+      "environment": "discrete simulator",
+      "live_model": true,
+      "status": "completed",
+      "model_calls": 8,
+      "tool_calls": 8,
+      "reported_tokens": 13992,
+      "replay_avoided_calls": 16
+    },
+    {
+      "scenario": "arm_disconnect",
+      "environment": "discrete simulator",
+      "live_model": true,
+      "status": "needs_human",
+      "model_calls": 7,
+      "tool_calls": 7,
+      "reported_tokens": 10389,
+      "replay_avoided_calls": 14
+    },
+    {
+      "scenario": "physical_clearance",
+      "environment": "real UNO USB telemetry",
+      "live_model": true,
+      "live_ambiguous": true,
+      "validation_method": "direct backend station selection; no new camera scan",
+      "status": "needs_human",
+      "observed_distance_cm": 2.3,
+      "minimum_distance_cm": 20,
+      "model_calls": 4,
+      "tool_calls": 4,
+      "reported_tokens": 5371,
+      "handoff_created": true,
+      "handoff_readback_verified": true,
+      "replay_avoided_calls": 8,
+      "hardware_commands": 0
+    }
+  ],
+  "firmware": {
+    "board": "arduino:avr:uno",
+    "motor_output_enabled": false,
+    "compiled": true,
+    "program_bytes": 6250,
+    "dynamic_memory_bytes": 504,
+    "uploaded_in_recorded_validation": false
+  }
+}

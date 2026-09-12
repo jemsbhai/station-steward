@@ -1,0 +1,10 @@
+fastapi==0.135.1
+uvicorn==0.34.3
+qrcode==8.2
+pillow==12.3.0
+pyzbar==0.1.9
+httpx>=0.28,<0.29
+pyserial==3.5
+pollard @ git+https://github.com/jemsbhai/pollard.git@ddd4b85ea77b4cc46bbf5fb9432efd9883123557
+chronofy @ git+https://github.com/jemsbhai/chronofy.git@c3eb0c32392282ec97fbab5da4d79ec6c14e5556
+mcp-edge @ git+https://github.com/jemsbhai/mcp-edge.git@95632bfde510b57c0bb31bb284aa5bd21317eb09
